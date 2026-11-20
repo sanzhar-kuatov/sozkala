@@ -1,0 +1,683 @@
+// =============================================================================
+// СӨЗҚАЛА / СЛОВОГРАД — data model (Stage 2)
+//
+// Database: one SQLite file (prisma/dev.db). After editing this file run
+//   npm run db:migrate -- --name <what-changed>
+// which creates a migration and regenerates the client.
+//
+// SQLite notes: enums are checked by Prisma, not by the database; there are no
+// scalar lists, so lists live in Json columns. The shapes of every Json column
+// are defined and validated with Zod in lib/tasks/schemas.ts and lib/domain/*.
+// Spec references (§) point to Sozqala_tehnikalyk_tapsyrma_kz.docx.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ----------------------------------------------------------------------------
+// Enums
+// ----------------------------------------------------------------------------
+
+/// §2: four roles.
+enum Role {
+  STUDENT
+  TEACHER
+  PARENT
+  ADMIN
+}
+
+enum Locale {
+  kk
+  ru
+}
+
+/// §4: how a building's aggregate score is computed from its task results.
+enum ScoringMode {
+  BEST // best result per task, averaged over the building's tasks
+  AVERAGE // average of all graded attempts
+  REQUIRED_ONLY // only required tasks count (best result per task, averaged)
+}
+
+/// §5: task types.
+enum TaskType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  MATCHING
+  FILL_GAPS
+  WORD_ORDER
+  ERROR_CORRECTION
+  PUNCTUATION
+  TEXT_ANALYSIS
+  CHARACTER_ID
+  ESSAY
+  CREATIVE
+  AUDIO
+}
+
+/// §5: closed tasks are checked automatically, open answers by the teacher.
+enum GradingMode {
+  AUTO
+  MANUAL
+}
+
+enum TaskStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  IN_PROGRESS // started, answers autosaved
+  PENDING_REVIEW // submitted, waiting for the teacher (manual tasks)
+  GRADED // has a final score
+  RETURNED // teacher returned it for redo (does not count)
+}
+
+enum MaterialKind {
+  TEXT
+  IMAGE
+  AUDIO
+  VIDEO
+}
+
+/// §6: collectable resources.
+enum RewardKind {
+  POINTS // білім ұпайлары / очки знаний
+  MATERIALS // құрылыс материалдары / стройматериалы
+  STARS // шеберлік жұлдыздары / звёзды мастерства
+}
+
+/// §6: cosmetic decorations (never affect scores).
+enum DecorationKind {
+  TREE
+  FLOWER
+  ROAD
+  BENCH
+  LAMP
+  FOUNTAIN
+}
+
+/// §8 (parent) plus the role-specific events the cabinets need.
+enum NotificationType {
+  NEW_BUILDING // «Балаңыз жаңа ғимарат салды!»
+  DAILY_SUMMARY // «Бүгін 5 тапсырма орындалды»
+  TOPIC_RESULT // «... тақырыбы бойынша нәтиже: 8/10»
+  COMPLETION_REMAINING // «Қаланы аяқтауға 20% қалды»
+  CERTIFICATE_ISSUED // «Балаңыз сертификат алды!»
+  LEVEL_UP // student: a building reached a new level
+  WORK_GRADED // student: teacher graded a manual task
+  WORK_RETURNED // student: teacher returned work for redo
+  REVIEW_NEEDED // teacher: new work in the review queue
+  ACHIEVEMENT_EARNED // student: a new badge
+}
+
+/// §7: certificate tiers.
+enum CertificateTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+// ----------------------------------------------------------------------------
+// People, schools, classes
+// ----------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  login        String    @unique
+  passwordHash String
+  role         Role
+  firstName    String
+  lastName     String
+  email        String?   @unique // optional; e-mail notifications are a later feature (§8)
+  locale       Locale    @default(kk)
+  isActive     Boolean   @default(true)
+  schoolId     String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+
+  // student
+  city               City?
+  memberships        ClassMember[]
+  parentLinks        ParentLink[]         @relation("ChildLinks")
+  attempts           Attempt[]            @relation("StudentAttempts")
+  achievements       StudentAchievement[]
+  rewards            RewardTransaction[]
+  certificates       Certificate[]
+  allowances         AttemptAllowance[]   @relation("AllowanceStudent")
+  personalTasks      TaskAssignment[]     @relation("AssignedStudent")
+  aboutNotifications Notification[]       @relation("NotificationSubject")
+
+  // parent
+  childLinks ParentLink[] @relation("ParentLinks")
+
+  // teacher
+  classesTaught      SchoolClass[]
+  topics             Topic[]
+  tasksAuthored      Task[]
+  assignmentsCreated TaskAssignment[]   @relation("AssignedBy")
+  attemptsGraded     Attempt[]          @relation("GradedBy")
+  allowancesGranted  AttemptAllowance[] @relation("AllowanceGrantedBy")
+  materials          Material[]
+
+  // everyone
+  notifications Notification[] @relation("NotificationRecipient")
+  auditLogs     AuditLog[]
+  sessions      Session[]
+
+  @@index([role])
+  @@index([schoolId])
+}
+
+/// A signed-in device. The cookie holds a signed token with this id; deleting
+/// the row (logout, deactivation, password reset) ends the session immediately.
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users   User[]
+  classes SchoolClass[]
+}
+
+/// A class such as 7«Ә». Named SchoolClass because `Class` is awkward in TypeScript.
+model SchoolClass {
+  id           String    @id @default(cuid())
+  schoolId     String
+  teacherId    String
+  name         String // "7«Ә»"
+  grade        Int // 5–11
+  academicYear String // "2026-2027"
+  inviteCode   String    @unique // students join with /join/[code]
+  archivedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  school            School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacher           User                  @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  members           ClassMember[]
+  buildingConfigs   ClassBuildingConfig[]
+  assignments       TaskAssignment[]
+  certificatePolicy CertificatePolicy?
+  certificates      Certificate[]
+
+  @@index([teacherId])
+  @@index([schoolId])
+}
+
+model ClassMember {
+  classId   String
+  studentId String
+  joinedAt  DateTime @default(now())
+
+  class   SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([classId, studentId])
+  @@index([studentId])
+}
+
+/// §2.3: a parent sees only linked children.
+model ParentLink {
+  parentId  String
+  studentId String
+  createdAt DateTime @default(now())
+
+  parent  User @relation("ParentLinks", fields: [parentId], references: [id], onDelete: Cascade)
+  student User @relation("ChildLinks", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, studentId])
+  @@index([studentId])
+}
+
+// ----------------------------------------------------------------------------
+// City and buildings (§3, §4)
+// ----------------------------------------------------------------------------
+
+/// One personal city per student. Resource balances are cached here; the
+/// RewardTransaction ledger is the history.
+model City {
+  id        String   @id @default(cuid())
+  studentId String   @unique
+  name      String
+  points    Int      @default(0)
+  materials Int      @default(0)
+  stars     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student     User               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  buildings   BuildingProgress[]
+  decorations CityDecoration[]
+}
+
+/// The 8 learning buildings (reference data, seeded). Keys match design/iso/buildings.js.
+model BuildingType {
+  id        String  @id @default(cuid())
+  key       String  @unique // grammar | bridge | library | theatre | tower | academy | park | townhall
+  nameKk    String
+  nameRu    String
+  areaKk    String
+  areaRu    String
+  icon      String // lucide icon name
+  sortOrder Int
+  mapCol    Int // position on the 3×3 city map
+  mapRow    Int
+  isCore    Boolean @default(true) // counts as a "main building" for the certificate (§7)
+
+  classConfigs  ClassBuildingConfig[] @relation("ConfigBuilding")
+  unlocksOthers ClassBuildingConfig[] @relation("ConfigUnlockAfter")
+  topics        Topic[]
+  tasks         Task[]
+  progress      BuildingProgress[]
+}
+
+/// §3: per-class order, required flag, unlock rule and scoring mode of each building.
+model ClassBuildingConfig {
+  classId        String
+  buildingTypeId String
+  unlockOrder    Int
+  isRequired     Boolean     @default(true)
+  scoringMode    ScoringMode @default(BEST)
+  /// Unlock rule: open from the start (null), or after another building reaches `unlockMinLevel`.
+  unlockAfterId  String?
+  unlockMinLevel Int         @default(2)
+
+  class       SchoolClass   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  building    BuildingType  @relation("ConfigBuilding", fields: [buildingTypeId], references: [id], onDelete: Cascade)
+  unlockAfter BuildingType? @relation("ConfigUnlockAfter", fields: [unlockAfterId], references: [id], onDelete: SetNull)
+
+  @@id([classId, buildingTypeId])
+}
+
+/// Current state of one building in one city. `level` never decreases (§4).
+model BuildingProgress {
+  id             String   @id @default(cuid())
+  cityId         String
+  buildingTypeId String
+  level          Int      @default(0) // 0 = empty lot … 5 = masterpiece
+  score          Float? // current aggregate score (0–10) by the class scoring mode
+  updatedAt      DateTime @updatedAt
+
+  city     City                 @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  building BuildingType         @relation(fields: [buildingTypeId], references: [id], onDelete: Cascade)
+  events   BuildingLevelEvent[]
+
+  @@unique([cityId, buildingTypeId])
+}
+
+/// History of level changes — "building development stages" for parents (§2.3).
+model BuildingLevelEvent {
+  id         String   @id @default(cuid())
+  progressId String
+  fromLevel  Int
+  toLevel    Int
+  score      Float
+  attemptId  String?
+  createdAt  DateTime @default(now())
+
+  progress BuildingProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  attempt  Attempt?         @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@index([progressId, createdAt])
+}
+
+// ----------------------------------------------------------------------------
+// Learning content (§2.2, §5)
+// ----------------------------------------------------------------------------
+
+model Topic {
+  id             String   @id @default(cuid())
+  authorId       String
+  buildingTypeId String?
+  title          String // content language: Russian
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  building BuildingType? @relation(fields: [buildingTypeId], references: [id], onDelete: SetNull)
+  tasks    Task[]
+
+  @@index([authorId])
+}
+
+/// A task attached to a building. `content` / `answerKey` / `criteria` shapes
+/// depend on `type` — see lib/tasks/schemas.ts. The answer key is never sent to students.
+model Task {
+  id             String      @id @default(cuid())
+  authorId       String
+  topicId        String?
+  buildingTypeId String
+  type           TaskType
+  grading        GradingMode
+  status         TaskStatus  @default(DRAFT)
+  title          String
+  instruction    String
+  content        Json
+  answerKey      Json?
+  explanation    String? // shown after the attempt
+  criteria       Json? // manual-grading rubric: [{ id, title, max }]
+  difficulty     Int         @default(2) // 1–3
+  timeLimitSec   Int? // null = no limit
+  maxAttempts    Int? // null = unlimited
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  topic       Topic?             @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  building    BuildingType       @relation(fields: [buildingTypeId], references: [id], onDelete: Restrict)
+  assignments TaskAssignment[]
+  attempts    Attempt[]
+  materials   Material[]
+  allowances  AttemptAllowance[]
+
+  @@index([buildingTypeId])
+  @@index([authorId])
+  @@index([topicId])
+}
+
+/// §2.2: assign a task to a whole class or to one student, with deadline and required flag.
+/// Exactly one of classId / studentId is set (enforced in lib, SQLite has no CHECK via Prisma).
+model TaskAssignment {
+  id           String    @id @default(cuid())
+  taskId       String
+  classId      String?
+  studentId    String?
+  assignedById String
+  isRequired   Boolean   @default(true)
+  deadline     DateTime?
+  createdAt    DateTime  @default(now())
+
+  task       Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  class      SchoolClass? @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student    User?        @relation("AssignedStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  assignedBy User         @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, classId])
+  @@unique([taskId, studentId])
+  @@index([classId])
+  @@index([studentId])
+}
+
+/// §2.2 "allow a retake": extra attempts beyond Task.maxAttempts for one student.
+model AttemptAllowance {
+  id            String   @id @default(cuid())
+  taskId        String
+  studentId     String
+  extraAttempts Int      @default(1)
+  grantedById   String
+  createdAt     DateTime @default(now())
+
+  task      Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  student   User @relation("AllowanceStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  grantedBy User @relation("AllowanceGrantedBy", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@index([taskId, studentId])
+}
+
+/// §2.2: text, image, audio and video materials attached to a task.
+model Material {
+  id           String       @id @default(cuid())
+  taskId       String?
+  uploadedById String
+  kind         MaterialKind
+  title        String
+  body         String? // TEXT materials
+  filePath     String? // uploads/… for files
+  mimeType     String?
+  sizeBytes    Int?
+  createdAt    DateTime     @default(now())
+
+  task       Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User  @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@index([taskId])
+}
+
+/// One try of a task by a student. The full history is kept (§4 "retake history is stored").
+model Attempt {
+  id          String        @id @default(cuid())
+  taskId      String
+  studentId   String
+  number      Int // 1, 2, 3… per (task, student)
+  status      AttemptStatus @default(IN_PROGRESS)
+  answers     Json
+  /// Per-question result for closed tasks: [{ questionId, correct, earned, max }] → mistakes screen.
+  result      Json?
+  autoScore   Float?
+  manualScore Float?
+  rubric      Json? // manual: { [criterionId]: points }
+  score       Float? // final 0–10, set when GRADED
+  feedback    String?
+  startedAt   DateTime      @default(now())
+  submittedAt DateTime?
+  gradedAt    DateTime?
+  gradedById  String?
+
+  task        Task                 @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  student     User                 @relation("StudentAttempts", fields: [studentId], references: [id], onDelete: Cascade)
+  gradedBy    User?                @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
+  levelEvents BuildingLevelEvent[]
+  rewards     RewardTransaction[]
+
+  @@unique([taskId, studentId, number])
+  @@index([studentId, status])
+  @@index([status])
+}
+
+// ----------------------------------------------------------------------------
+// Rewards and decorations (§6)
+// ----------------------------------------------------------------------------
+
+/// Ledger of earned (or spent) points, materials and stars. City holds the balances.
+model RewardTransaction {
+  id        String     @id @default(cuid())
+  studentId String
+  kind      RewardKind
+  amount    Int
+  reason    String // machine-readable, e.g. "attempt.graded", "decoration.unlock"
+  attemptId String?
+  createdAt DateTime   @default(now())
+
+  student User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  attempt Attempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@index([studentId, createdAt])
+}
+
+/// Achievement badges, e.g. «Сөз сәулетшісі». `rule` is evaluated by lib/rewards (Stage 8).
+model Achievement {
+  id            String @id @default(cuid())
+  key           String @unique
+  nameKk        String
+  nameRu        String
+  descriptionKk String
+  descriptionRu String
+  icon          String // lucide icon name
+  color         String // token name, e.g. "sky", "violet"
+  rule          Json
+  sortOrder     Int
+
+  students StudentAchievement[]
+}
+
+model StudentAchievement {
+  studentId     String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  student     User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, achievementId])
+}
+
+model Decoration {
+  id            String         @id @default(cuid())
+  key           String         @unique
+  kind          DecorationKind
+  nameKk        String
+  nameRu        String
+  costMaterials Int            @default(0) // price in building materials
+  sortOrder     Int
+
+  placed CityDecoration[]
+}
+
+/// A decoration the student owns. x/y = map tile; null while still in the inventory.
+model CityDecoration {
+  id           String   @id @default(cuid())
+  cityId       String
+  decorationId String
+  x            Int?
+  y            Int?
+  createdAt    DateTime @default(now())
+
+  city       City       @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  decoration Decoration @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+
+  @@index([cityId])
+}
+
+// ----------------------------------------------------------------------------
+// Notifications (§8)
+// ----------------------------------------------------------------------------
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  subjectId   String? // the student the notification is about (for parents/teachers)
+  type        NotificationType
+  payload     Json // values for the localized message, e.g. { building: "grammar", level: 3 }
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  subject   User? @relation("NotificationSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, readAt])
+}
+
+// ----------------------------------------------------------------------------
+// Certificates (§7)
+// ----------------------------------------------------------------------------
+
+/// Tier thresholds (minimum final score, 0–10) and requirements.
+/// classId = null is the platform default (admin); a class row overrides it (teacher).
+model CertificatePolicy {
+  id               String   @id @default(cuid())
+  classId          String?  @unique
+  bronzeMin        Float    @default(6)
+  silverMin        Float    @default(7.5)
+  goldMin          Float    @default(8.5)
+  platinumMin      Float    @default(9.5)
+  /// Every required building must reach at least this level.
+  minBuildingLevel Int      @default(3)
+  updatedAt        DateTime @updatedAt
+
+  class SchoolClass? @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+model CertificateTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  titleKk   String
+  titleRu   String
+  isActive  Boolean  @default(true)
+  design    Json // colours / layout options for the PDF renderer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  certificates Certificate[]
+}
+
+/// Issued certificate. The public /verify/[verifyCode] page shows only
+/// validity, serial, tier and issue date — never personal data (§7, §11).
+model Certificate {
+  id            String          @id @default(cuid())
+  serial        String          @unique // SZ-2026-000001
+  verifyCode    String          @unique // random, unguessable
+  studentId     String
+  classId       String?
+  templateId    String?
+  tier          CertificateTier
+  finalScore    Float
+  /// Name, class and per-building levels at the moment of issue (for the PDF).
+  snapshot      Json
+  issuedAt      DateTime        @default(now())
+  revokedAt     DateTime?
+  /// "REPLACED" (a higher tier was issued later) or "REVOKED" (by an admin; not re-issued automatically).
+  revokedReason String?
+
+  student  User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class    SchoolClass?         @relation(fields: [classId], references: [id], onDelete: SetNull)
+  template CertificateTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+}
+
+// ----------------------------------------------------------------------------
+// Platform (§2.4, §11)
+// ----------------------------------------------------------------------------
+
+/// Key-value platform settings edited by the admin.
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+/// §11 "history of changes": who did what.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String // e.g. "task.create", "attempt.grade", "user.role.change"
+  entity    String
+  entityId  String?
+  data      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+/// §11 "error journal".
+model ErrorLog {
+  id        String   @id @default(cuid())
+  level     String // "error" | "warn"
+  message   String
+  stack     String?
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

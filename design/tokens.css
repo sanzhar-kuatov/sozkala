@@ -1,0 +1,165 @@
+/* ==========================================================================
+   СӨЗҚАЛА / СЛОВОГРАД — design tokens (Stage 0)
+   Single source of truth. Stage 1 imports this file and maps the variables
+   into Tailwind v4 `@theme`, so names here are stable public API.
+   ========================================================================== */
+
+:root {
+  /* ---------- Brand palette ------------------------------------------- */
+  /* Sky blue + sun gold echo the Kazakhstan flag and read as "bright & friendly". */
+  --sz-sky-50:  #E8F9FC;
+  --sz-sky-100: #C4EEF6;
+  --sz-sky-300: #5FD0E3;
+  --sz-sky-500: #00AFCA;   /* primary */
+  --sz-sky-600: #0096AE;
+  --sz-sky-700: #007A8E;   /* primary pressed / 3D button edge */
+
+  --sz-sun-100: #FFF3C4;
+  --sz-sun-300: #FFDD6E;
+  --sz-sun-500: #FFC72C;   /* accent: rewards, stars, gold trim */
+  --sz-sun-600: #F0AE00;
+  --sz-sun-700: #B98500;
+
+  --sz-coral-100: #FFE3E3;
+  --sz-coral-500: #FF6B6B; /* errors, low scores (never "scary red") */
+  --sz-coral-700: #D94848;
+
+  --sz-grass-100: #DDF5E3;
+  --sz-grass-500: #34B36B; /* success, high scores */
+  --sz-grass-700: #208A4F;
+
+  --sz-violet-100: #ECE7FF;
+  --sz-violet-500: #7C5CFF; /* achievements, perfect 10 */
+  --sz-violet-700: #5A3BE0;
+
+  --sz-ink-900: #1E2A3B;   /* text */
+  --sz-ink-700: #3A4A5F;
+  --sz-ink-500: #6B7A90;   /* muted text */
+  --sz-ink-300: #B8C2D0;
+  --sz-ink-100: #E8EDF3;
+
+  --sz-paper:   #FFFBF3;   /* app background: warm, paper-like */
+  --sz-cream:   #FFF3DC;
+  --sz-surface: #FFFFFF;
+  --sz-line:    #EFE4D0;   /* warm hairline */
+
+  /* ---------- Semantic aliases (use these in components) --------------- */
+  --color-bg:            var(--sz-paper);
+  --color-surface:       var(--sz-surface);
+  --color-surface-alt:   var(--sz-cream);
+  --color-text:          var(--sz-ink-900);
+  --color-text-muted:    var(--sz-ink-500);
+  --color-border:        var(--sz-line);
+  --color-primary:       var(--sz-sky-500);
+  --color-primary-hover: var(--sz-sky-600);
+  --color-primary-edge:  var(--sz-sky-700);
+  --color-on-primary:    #FFFFFF;
+  --color-accent:        var(--sz-sun-500);
+  --color-accent-edge:   var(--sz-sun-700);
+  --color-success:       var(--sz-grass-500);
+  --color-warning:       var(--sz-sun-600);
+  --color-danger:        var(--sz-coral-500);
+  --color-info:          var(--sz-violet-500);
+  --color-focus:         #1E88E5;
+
+  /* ---------- Role accents (header stripe, avatars, chips) ------------- */
+  --role-student: var(--sz-sky-500);
+  --role-teacher: #2EAD6B;
+  --role-parent:  #FF8A3D;
+  --role-admin:   #5B6B82;
+
+  /* ---------- Score scale (0–10) -> colour ---------------------------- */
+  --score-0:  var(--sz-ink-300);  /* not attempted */
+  --score-1:  var(--sz-coral-500); /* 1–3  foundation */
+  --score-2:  #FF9F43;             /* 4–5  small building */
+  --score-3:  var(--sz-sun-500);   /* 6–7  full building */
+  --score-4:  var(--sz-grass-500); /* 8–9  decorated */
+  --score-5:  var(--sz-violet-500); /* 10  masterpiece */
+
+  /* ---------- Certificate tiers -------------------------------------- */
+  --tier-bronze:   #CD7F32;
+  --tier-silver:   #A9B4C2;
+  --tier-gold:     #F2B705;
+  --tier-platinum: #7FC8DC;
+
+  /* ---------- Isometric world ---------------------------------------- */
+  --iso-sky-top:    #BDEBFF;
+  --iso-sky-bottom: #F2FBFF;
+  --iso-grass:      #8ED16F;
+  --iso-grass-dark: #6FB552;
+  --iso-earth:      #B98A5E;
+  --iso-road:       #CDD3DB;
+  --iso-water:      #4FC3F7;
+  --iso-path:       #EADBC0;
+
+  /* ---------- Typography --------------------------------------------- */
+  /* Both families ship cyrillic-ext → all Kazakh letters (Ә Ғ Қ Ң Ө Ұ Ү Һ І). */
+  --font-display: "Rubik", "Nunito", system-ui, sans-serif;
+  --font-body:    "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  --text-xs:   0.75rem;  /* 12 */
+  --text-sm:   0.875rem; /* 14 */
+  --text-base: 1rem;     /* 16 — never smaller for task content */
+  --text-lg:   1.125rem; /* 18 — task questions */
+  --text-xl:   1.375rem; /* 22 */
+  --text-2xl:  1.75rem;  /* 28 */
+  --text-3xl:  2.25rem;  /* 36 */
+  --text-4xl:  3rem;     /* 48 */
+
+  /* ---------- Shape & depth ------------------------------------------ */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-pill: 999px;
+
+  --shadow-card:  0 1px 0 rgba(30, 42, 59, .04), 0 8px 24px -6px rgba(30, 42, 59, .12);
+  --shadow-float: 0 18px 40px -12px rgba(30, 42, 59, .28);
+  --edge-depth:   4px; /* "chunky" 3D press depth for game buttons */
+
+  /* ---------- Spacing (4px grid) -------------------------------------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+
+  /* ---------- Motion -------------------------------------------------- */
+  --ease-out:    cubic-bezier(.22, 1, .36, 1);
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 600ms;
+  --dur-build: 900ms;
+
+  /* ---------- Breakpoints (reference only; CSS vars can't be used in @media) */
+  /* sm 640 · md 768 (tablet) · lg 1024 · xl 1280 */
+}
+
+/* ==========================================================================
+   Isometric scene animations — shared by preview and the app
+   ========================================================================== */
+.iso-flag    { transform-box: fill-box; transform-origin: left center; animation: iso-wave 1.8s ease-in-out infinite; }
+.iso-spray   { stroke-dasharray: 3 5; animation: iso-spray .8s linear infinite; }
+.iso-twinkle { transform-box: fill-box; transform-origin: center; animation: iso-twinkle 2.6s ease-in-out infinite; opacity: 0; }
+.iso-pulse   { animation: iso-pulse 2.2s ease-in-out infinite; }
+.iso-beam    { transform-box: fill-box; transform-origin: 50% 100%; animation: iso-beam 5s ease-in-out infinite alternate; }
+.iso-ripple  { animation: iso-ripple 3s ease-in-out infinite; }
+.iso-ghost   { opacity: .16; filter: grayscale(1) brightness(1.7); }
+
+.iso-build.is-rising { transform-box: fill-box; transform-origin: 50% 100%; animation: iso-rise var(--dur-build) var(--ease-bounce) both; }
+.iso-dust circle     { transform-box: fill-box; transform-origin: center; animation: iso-dust .9s var(--ease-out) both; }
+
+@keyframes iso-wave    { 50% { transform: skewY(9deg) scaleX(.86); } }
+@keyframes iso-spray   { to { stroke-dashoffset: -16; } }
+@keyframes iso-twinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+@keyframes iso-pulse   { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes iso-beam    { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+@keyframes iso-ripple  { 0%, 100% { transform: translateX(0); opacity: .9; } 50% { transform: translateX(4px); opacity: .4; } }
+@keyframes iso-rise    { 0% { transform: scale(1, .04); opacity: 0; } 55% { transform: scale(1, 1.07); opacity: 1; } 78% { transform: scale(1, .97); } 100% { transform: scale(1, 1); } }
+@keyframes iso-dust    { 0% { transform: scale(.2); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .iso-flag, .iso-spray, .iso-twinkle, .iso-pulse, .iso-beam, .iso-ripple,
+  .iso-build.is-rising, .iso-dust circle { animation: none !important; }
+  .iso-twinkle { opacity: .8; }
+}

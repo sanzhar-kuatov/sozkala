@@ -1,0 +1,15 @@
+# Never upload local data or secrets to Vercel
+.env
+.env.*
+!.env.example
+prisma/*.db
+prisma/*.db-*
+uploads/
+uploads-e2e/
+backups/
+backups-e2e/
+node_modules/
+.next/
+generated/
+test-results/
+playwright-report/

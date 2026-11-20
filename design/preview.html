@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="kk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сөзқала Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@500;600;700;800&display=swap&subset=cyrillic-ext" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="preview.css">
+</head>
+<body>
+<div id="defs"></div>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="brand-mark" id="brand-mark" viewBox="0 0 40 40" aria-hidden="true"></svg>
+      <div><span data-i18n="brand">СӨЗҚАЛА</span><small data-i18n="brandSub">Design system · Stage 0</small></div>
+    </div>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#colors" data-i18n="nav.colors">Түстер</a>
+      <a href="#type" data-i18n="nav.type">Қаріп</a>
+      <a href="#components" data-i18n="nav.components">Компоненттер</a>
+      <a href="#buildings" data-i18n="nav.buildings">Ғимараттар</a>
+      <a href="#city" data-i18n="nav.city">Қала</a>
+      <a href="#screens" data-i18n="nav.screens">Экрандар</a>
+      <a href="#certificate" data-i18n="nav.cert">Сертификат</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="kk" aria-pressed="true">ҚАЗ</button>
+      <button type="button" data-lang="ru" aria-pressed="false">РУС</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <div class="cloud" style="width:120px;height:34px;top:60px;animation-duration:55s"></div>
+  <div class="cloud" style="width:80px;height:24px;top:150px;animation-duration:70s;animation-delay:-30s"></div>
+  <div class="wrap">
+    <div>
+      <div class="chip chip--student" data-i18n="hero.kicker">Орыс тілі мен әдебиеті · 5–11 сынып</div>
+      <h1 style="margin-top:14px"><span data-i18n="hero.t1">Біліміңмен</span><br><span data-i18n="hero.t2" style="color:inherit">қалаңды сал!</span></h1>
+      <p class="lead" data-i18n="hero.lead">Әр тапсырма — бір кірпіш. Нәтиже неғұрлым жоғары болса, ғимарат соғұрлым көркем.</p>
+      <div class="tags">
+        <span class="chip chip--student"><i data-lucide="backpack"></i><span data-i18n="role.student">Оқушы</span></span>
+        <span class="chip chip--teacher"><i data-lucide="presentation"></i><span data-i18n="role.teacher">Мұғалім</span></span>
+        <span class="chip chip--parent"><i data-lucide="heart-handshake"></i><span data-i18n="role.parent">Ата-ана</span></span>
+        <span class="chip chip--admin"><i data-lucide="shield"></i><span data-i18n="role.admin">Әкімші</span></span>
+      </div>
+    </div>
+    <div class="hero-city" id="hero-city"></div>
+  </div>
+</section>
+
+<main>
+<!-- ============================== 1. PRINCIPLES ============================== -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2 data-i18n="s1.title">Дизайн қағидалары</h2></div>
+    <div class="grid g4">
+      <div class="card card--tint"><h3 data-i18n="p1.t">Нәтиже — қала</h3><p data-i18n="p1.d">Әр балл қалада көрінеді. Ғимарат — оқу нәтижесінің визуалды айнасы.</p></div>
+      <div class="card card--tint"><h3 data-i18n="p2.t">Ешқашан бұзылмайды</h3><p data-i18n="p2.d">Төмен балл ғимаратты бұзбайды. Тек өсу бар — қорқыныш жоқ.</p></div>
+      <div class="card card--tint"><h3 data-i18n="p3.t">Ойын, бірақ оқу</h3><p data-i18n="p3.d">Жарқын ойын стилі — бірақ тапсырма мәтіні таза, ірі, оқуға ыңғайлы.</p></div>
+      <div class="card card--tint"><h3 data-i18n="p4.t">Кез келген экран</h3><p data-i18n="p4.d">Телефоннан бастап жобалаймыз: 360px, 44px түймелер, саусақпен басқару.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 2. COLOURS ============================== -->
+<section class="block" id="colors">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2 data-i18n="s2.title">Түстер</h2><p data-i18n="s2.d">Көк пен күн-сары — Қазақстан туының реңктері. Қызыл «қорқынышты» емес, жұмсақ маржан.</p></div>
+    <div class="label" data-i18n="s2.brand">Бренд</div>
+    <div class="swatches" id="sw-brand"></div>
+    <div class="label" style="margin-top:20px" data-i18n="s2.score">Балл шкаласы → ғимарат деңгейі</div>
+    <div class="swatches" id="sw-score"></div>
+    <div class="label" style="margin-top:20px" data-i18n="s2.roles">Рөлдер · сертификат деңгейлері · әлем</div>
+    <div class="swatches" id="sw-other"></div>
+  </div>
+</section>
+
+<!-- ============================== 3. TYPE ============================== -->
+<section class="block" id="type">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2 data-i18n="s3.title">Типография</h2><p data-i18n="s3.d">Rubik — тақырыптар, Nunito — мәтін. Екеуі де қазақ әріптерін толық қолдайды.</p></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="type-row"><code>4xl/800</code><h1 style="font-size:var(--text-4xl)">Сөзқала</h1></div>
+        <div class="type-row"><code>2xl/800</code><h2 style="font-size:var(--text-2xl)">Грамматика сарайы</h2></div>
+        <div class="type-row"><code>xl/700</code><h3 style="font-size:var(--text-xl)">Дворец грамматики</h3></div>
+        <div class="type-row"><code>lg/800 task</code><p class="q-text">Выберите слова, в которых пишется НН.</p></div>
+        <div class="type-row"><code>base/600</code><p>Мұғалім эссені тексергеннен кейін қала көрінісі жаңартылады.</p></div>
+        <div class="type-row"><code>sm/700 muted</code><p style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700">Соңғы әрекет: 18.11.2026, 14:20</p></div>
+      </div>
+      <div class="card">
+        <div class="label" data-i18n="s3.glyphs">Қазақ әріптері</div>
+        <div class="kz-glyphs">Әә Ғғ Ққ Ңң Өө Ұұ Үү Һһ Іі</div>
+        <div class="label" style="margin-top:20px" data-i18n="s3.rules">Ережелер</div>
+        <ul style="margin:0;padding-left:18px;display:grid;gap:6px">
+          <li data-i18n="s3.r1">Тапсырма мәтіні — кемінде 18px, жол аралығы 1.5.</li>
+          <li data-i18n="s3.r2">Мәтін ені — 70 таңбадан аспайды.</li>
+          <li data-i18n="s3.r3">Балл мен сандар — Rubik 800, анық және ірі.</li>
+          <li data-i18n="s3.r4">Оқу мазмұны (тапсырмалар) — орыс тілінде, интерфейс — қаз/орыс.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 4. COMPONENTS ============================== -->
+<section class="block" id="components">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2 data-i18n="s4.title">Компоненттер</h2></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="label" data-i18n="s4.buttons">Түймелер</div>
+        <div class="btn-row">
+          <button class="btn"><i data-lucide="hammer"></i><span data-i18n="btn.build">Салу</span></button>
+          <button class="btn btn--accent"><i data-lucide="star"></i><span data-i18n="btn.reward">Марапат алу</span></button>
+          <button class="btn btn--success"><i data-lucide="check"></i><span data-i18n="btn.check">Тексеру</span></button>
+          <button class="btn btn--ghost" data-i18n="btn.cancel">Бас тарту</button>
+          <button class="btn btn--danger btn--sm" data-i18n="btn.delete">Жою</button>
+          <button class="btn" disabled data-i18n="btn.locked">Жабық</button>
+        </div>
+        <div class="label" style="margin-top:22px" data-i18n="s4.fields">Енгізу өрістері</div>
+        <div class="grid g2">
+          <div class="field"><label for="f1" data-i18n="f.login">Логин</label><input id="f1" value="aru.k"><span class="hint" data-i18n="f.loginHint">Мұғалім берген логин</span></div>
+          <div class="field is-error"><label for="f2" data-i18n="f.pass">Құпиясөз</label><input id="f2" type="password" value="12"><span class="hint" data-i18n="f.passErr">Кемінде 8 таңба</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label" data-i18n="s4.score">Балл және деңгей</div>
+        <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+          <div class="score-ring" style="--v:7;--c:var(--score-3)"><span>7<small>/10</small></span></div>
+          <div class="score-ring score-ring--sm" style="--v:10;--c:var(--score-5)"><span>10</span></div>
+          <div class="score-ring score-ring--sm" style="--v:4;--c:var(--score-2)"><span>4</span></div>
+          <div style="display:grid;gap:8px" id="level-pills"></div>
+        </div>
+        <div class="label" style="margin-top:20px" data-i18n="s4.progress">Қаланың аяқталуы</div>
+        <div style="display:flex;justify-content:space-between;font-weight:800"><span data-i18n="city.done">Қала дайын</span><span>62%</span></div>
+        <div class="progress" style="--p:62%;margin-top:6px"><i></i></div>
+        <div class="label" style="margin-top:20px" data-i18n="s4.resources">Ресурстар</div>
+        <div class="btn-row">
+          <span class="counter"><i style="background:var(--sz-sky-100);color:var(--sz-sky-700)"><i data-lucide="brain"></i></i>1 240 <small data-i18n="res.points" style="font-weight:700;color:var(--color-text-muted)">ұпай</small></span>
+          <span class="counter"><i style="background:#FFE3D6;color:#C2410C"><i data-lucide="brick-wall"></i></i>86 <small data-i18n="res.materials" style="font-weight:700;color:var(--color-text-muted)">материал</small></span>
+          <span class="counter"><i style="background:var(--sz-sun-100);color:var(--sz-sun-700)"><i data-lucide="star"></i></i>14 <small data-i18n="res.stars" style="font-weight:700;color:var(--color-text-muted)">жұлдыз</small></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label" data-i18n="s4.badges">Жетістік белгілері</div>
+        <div class="grid g4" id="badges"></div>
+      </div>
+      <div class="card">
+        <div class="label" data-i18n="s4.notifs">Ата-анаға хабарламалар</div>
+        <div id="notifs"></div>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <div class="label" data-i18n="s4.tasktypes">Тапсырма түрлері</div>
+        <div class="btn-row" id="task-types"></div>
+        <p class="note" style="margin-top:10px" data-i18n="s4.tasknote">Жасыл — автоматты тексеріледі. Күлгін — мұғалім қолмен бағалайды.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 5. BUILDINGS ============================== -->
+<section class="block" id="buildings">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">05</span><h2 data-i18n="s5.title">8 ғимарат × 5 деңгей</h2><p data-i18n="s5.d">Барлық графика кодпен салынған SVG: 2:1 изометрия, жарық сол жақ жоғарыдан. Бос телімде болашақ ғимараттың «елесі» көрінеді.</p></div>
+    <div class="tabs" role="tablist" id="b-tabs"></div>
+    <div class="levels" id="b-levels"></div>
+
+    <div class="sim">
+      <div class="sim-stage" id="sim-stage"><div class="levelup" id="levelup"></div></div>
+      <div class="card">
+        <h3 data-i18n="sim.title">Бағалау симуляторы</h3>
+        <p class="note" data-i18n="sim.d">Тапсырманы «орындаңыз» — балл таңдаңыз. Ғимарат тек жақсарады.</p>
+        <div class="field" style="margin-top:14px">
+          <label for="sim-mode" data-i18n="sim.mode">Жиынтық балл тәсілі</label>
+          <select id="sim-mode">
+            <option value="best" data-i18n="mode.best">Ең үздік нәтиже</option>
+            <option value="avg" data-i18n="mode.avg">Орташа балл</option>
+            <option value="last" data-i18n="mode.last">Соңғы әрекет</option>
+          </select>
+        </div>
+        <div class="label" style="margin-top:14px" data-i18n="sim.submit">Әрекет нәтижесі</div>
+        <div class="score-keys" id="score-keys"></div>
+        <div class="label" style="margin-top:14px" data-i18n="sim.history">Әрекеттер тарихы</div>
+        <div class="history" id="sim-history"></div>
+        <dl class="kv" style="margin-top:14px">
+          <dt data-i18n="sim.agg">Жиынтық балл</dt><dd id="sim-agg">—</dd>
+          <dt data-i18n="sim.level">Деңгей</dt><dd id="sim-level">—</dd>
+        </dl>
+        <p class="note" id="sim-note" style="margin-top:8px;min-height:20px"></p>
+        <button class="btn btn--ghost btn--sm" id="sim-reset" style="margin-top:8px"><i data-lucide="rotate-ccw"></i><span data-i18n="sim.reset">Қайта бастау</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 6. CITY ============================== -->
+<section class="block" id="city">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">06</span><h2 data-i18n="s6.title">Оқушының қаласы</h2><p data-i18n="s6.d">3×3 тор: ортада — Білім ратушасы, бұрышта — қала атауы жазылған алаң. Ғимаратты басыңыз; масштабтау — дөңгелекпен немесе екі саусақпен.</p></div>
+    <div class="city-shell">
+      <div class="city-view" id="city-view">
+        <div class="city-hud">
+          <span class="counter"><i style="background:var(--sz-sun-100);color:var(--sz-sun-700)"><i data-lucide="building-2"></i></i><span id="city-pct">0%</span></span>
+          <button class="btn btn--sm btn--ghost" id="city-rand"><i data-lucide="shuffle"></i><span data-i18n="city.rand">Кездейсоқ</span></button>
+          <button class="btn btn--sm btn--ghost" id="city-empty" data-i18n="city.empty">Бос қала</button>
+          <button class="btn btn--sm btn--ghost" id="city-max" data-i18n="city.max">Толық қала</button>
+        </div>
+        <div id="city-canvas"></div>
+        <div class="city-zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button></div>
+      </div>
+      <div class="card info" id="city-info"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 7. SCREENS ============================== -->
+<section class="block" id="screens">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">07</span><h2 data-i18n="s7.title">Негізгі экрандар</h2><p data-i18n="s7.d">Әр рөлдің басты экранының жоғары сапалы макеті. Толық wireframe-дер: docs/design/03-ux-wireframes.md</p></div>
+
+    <!-- Student home -->
+    <div class="label" data-i18n="scr.student">Оқушы · басты бет (компьютер)</div>
+    <div class="device"><div class="screen">
+      <div class="mock-head">
+        <span class="stripe" style="background:var(--role-student)"></span>
+        <b style="font-family:var(--font-display)">«Аружан-қала»</b>
+        <span class="chip chip--student" style="margin-left:4px">7«Ә»</span>
+        <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="counter"><i style="background:var(--sz-sky-100);color:var(--sz-sky-700)"><i data-lucide="brain"></i></i>1 240</span>
+          <span class="counter"><i style="background:var(--sz-sun-100);color:var(--sz-sun-700)"><i data-lucide="star"></i></i>14</span>
+          <span class="counter"><i style="background:var(--sz-coral-100);color:var(--sz-coral-700)"><i data-lucide="bell"></i></i>2</span>
+        </span>
+      </div>
+      <div class="mock-body mock-split">
+        <div class="mini-city" id="mock-city"></div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-weight:800"><span data-i18n="city.done">Қала дайын</span><span id="mock-pct">0%</span></div>
+          <div class="progress" id="mock-progress" style="margin:6px 0 14px"><i></i></div>
+          <div id="mock-blist"></div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="grid g3" style="margin-top:28px;align-items:start">
+      <!-- Task player -->
+      <div>
+        <div class="label" data-i18n="scr.task">Оқушы · тапсырма (телефон)</div>
+        <div class="device device--phone"><div class="screen">
+          <div class="mock-head"><i data-lucide="x"></i><b style="font-size:14px" data-i18n="b.grammar">Грамматика сарайы</b><span class="chip" style="margin-left:auto"><i data-lucide="timer"></i>04:12</span></div>
+          <div class="mock-body">
+            <div class="dots"><i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i><i></i></div>
+            <div class="label" style="margin-top:14px"><span data-i18n="task.q">Сұрақ</span> 3 / 6 · <span data-i18n="tt.multi">Бірнеше дұрыс жауап</span></div>
+            <p class="q-text">Выберите слова, в которых пишется <u>НН</u>.</p>
+            <div class="opt is-checked"><span class="box"><i data-lucide="check"></i></span>деревя..ый</div>
+            <div class="opt"><span class="box"></span>серебря..ый</div>
+            <div class="opt is-checked"><span class="box"><i data-lucide="check"></i></span>стекля..ый</div>
+            <div class="opt"><span class="box"></span>кожа..ый</div>
+            <button class="btn btn--lg" style="width:100%;margin-top:18px" data-i18n="btn.check">Тексеру</button>
+          </div>
+        </div></div>
+      </div>
+      <!-- Result -->
+      <div>
+        <div class="label" data-i18n="scr.result">Оқушы · нәтиже (телефон)</div>
+        <div class="device device--phone"><div class="screen">
+          <div class="mock-body" style="text-align:center">
+            <div class="mini-city" id="mock-result-bld" style="position:relative"><div class="levelup show" style="animation:none;opacity:1;top:10px" data-i18n="res.levelup">+1 деңгей!</div></div>
+            <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-top:14px">
+              <div class="score-ring" style="--v:7;--c:var(--score-3);--size:88px"><span>7<small>/10</small></span></div>
+              <div style="text-align:left"><b style="font-family:var(--font-display);font-size:18px" data-i18n="res.built">Толық ғимарат салынды</b><br><span class="pill" style="--lv:var(--score-3);margin-top:6px"><b>3</b><span data-i18n="lvl.3">Толық ғимарат</span></span></div>
+            </div>
+            <div style="text-align:left;margin-top:16px">
+              <div class="label" data-i18n="res.mistakes">Қателер мен түсіндірме</div>
+              <div class="mistake"><b>серебря<u>н</u>ый</b> — суффикс <b>-ЯН-</b> пишется с одной Н.</div>
+              <div class="mistake ok"><b>деревя<u>нн</u>ый</b> — слово-исключение: стеклянный, оловянный, деревянный.</div>
+            </div>
+            <div class="btn-row" style="margin-top:16px;justify-content:center">
+              <button class="btn btn--ghost btn--sm"><i data-lucide="rotate-ccw"></i><span data-i18n="res.retry">Қайта орындау</span></button>
+              <button class="btn btn--sm"><i data-lucide="map"></i><span data-i18n="res.city">Қалаға</span></button>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <!-- Parent -->
+      <div>
+        <div class="label" data-i18n="scr.parent">Ата-ана · кабинет (телефон)</div>
+        <div class="device device--phone"><div class="screen">
+          <div class="mock-head"><span class="stripe" style="background:var(--role-parent)"></span><b data-i18n="parent.child">Балам: Аружан К., 7«Ә»</b></div>
+          <div class="mock-body">
+            <div class="mini-city" id="mock-parent-city"></div>
+            <div class="grid g2" style="grid-template-columns:1fr 1fr;margin-top:12px;gap:10px">
+              <div class="card card--flat" style="padding:12px"><div class="stat"><b>7.6</b><small data-i18n="t.avg">Орташа балл</small></div></div>
+              <div class="card card--flat" style="padding:12px"><div class="stat"><b>38</b><small data-i18n="t.done">Орындалды</small></div></div>
+            </div>
+            <div class="label" style="margin-top:14px" data-i18n="parent.hard">Қиын тақырыптар</div>
+            <div class="btn-row"><span class="chip" style="background:var(--sz-coral-100);color:var(--sz-coral-700)">Н / НН · 5.2</span><span class="chip" style="background:var(--sz-coral-100);color:var(--sz-coral-700)">Деепричастный оборот · 5.8</span></div>
+            <div class="label" style="margin-top:14px" data-i18n="s4.notifs">Хабарламалар</div>
+            <div id="mock-notifs"></div>
+            <p class="note" style="margin-top:10px"><i data-lucide="lock" style="width:14px;height:14px;vertical-align:-2px"></i> <span data-i18n="parent.ro">Тек қарау: баға өзгерту мүмкін емес</span></p>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- Teacher dashboard -->
+    <div class="label" style="margin-top:28px" data-i18n="scr.teacher">Мұғалім · басқару тақтасы (компьютер)</div>
+    <div class="device"><div class="screen">
+      <div class="mock-head">
+        <span class="stripe" style="background:var(--role-teacher)"></span>
+        <b style="font-family:var(--font-display)" data-i18n="t.dash">Сынып: 7«Ә» · 26 оқушы</b>
+        <span style="margin-left:auto" class="btn-row"><button class="btn btn--sm btn--success"><i data-lucide="plus"></i><span data-i18n="t.newtask">Жаңа тапсырма</span></button></span>
+      </div>
+      <div class="mock-body">
+        <div class="grid g4">
+          <div class="card card--flat"><div class="stat"><b>24</b><small data-i18n="t.tasks">Тапсырмалар</small></div></div>
+          <div class="card card--flat"><div class="stat"><b>7.4</b><small data-i18n="t.avg">Орташа балл</small></div></div>
+          <div class="card card--flat" style="border-color:var(--sz-violet-500)"><div class="stat"><b style="color:var(--sz-violet-700)">5</b><small data-i18n="t.pending">Тексеруді күтуде</small></div></div>
+          <div class="card card--flat"><div class="stat"><b>132</b><small data-i18n="t.buildings">Салынған ғимараттар</small></div></div>
+        </div>
+        <div class="mock-split" style="margin-top:14px">
+          <div class="card card--flat">
+            <div class="label" data-i18n="t.bytopic">Тақырып бойынша нәтиже</div>
+            <div class="bars" id="mock-bars"></div>
+          </div>
+          <div class="card card--flat scroll-x">
+            <div class="label" data-i18n="t.queue">Тексеру кезегі</div>
+            <table class="tbl">
+              <thead><tr><th data-i18n="t.student">Оқушы</th><th data-i18n="t.work">Жұмыс</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Аружан К.</td><td>Эссе «Мой любимый герой»</td><td><button class="btn btn--sm" data-i18n="t.grade">Бағалау</button></td></tr>
+                <tr><td>Дамир С.</td><td>Аудио: «Бородино», 1–3</td><td><button class="btn btn--sm" data-i18n="t.grade">Бағалау</button></td></tr>
+                <tr><td>Әли Н.</td><td>Творческая работа</td><td><button class="btn btn--sm" data-i18n="t.grade">Бағалау</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============================== 8. CERTIFICATE ============================== -->
+<section class="block" id="certificate">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">08</span><h2 data-i18n="s8.title">Сертификат және тексеру беті</h2><p data-i18n="s8.d">PDF, A4 альбомдық. QR-код тексеру бетіне апарады — онда жеке деректер көрсетілмейді.</p></div>
+    <div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;align-items:center" id="cert-grid">
+      <div class="cert">
+        <div>
+          <div class="c-kicker">СӨЗҚАЛА · СЛОВОГРАД</div>
+          <h4>СӨЗҚАЛАНЫҢ БАС СӘУЛЕТШІСІ</h4>
+        </div>
+        <div>
+          <div class="c-name">Қайратқызы Аружан</div>
+          <div class="c-meta">7«Ә» сынып · Қорытынды көрсеткіш: 9.1 / 10 · 18.11.2026</div>
+          <div class="c-city" id="cert-city"></div>
+        </div>
+        <div class="c-foot">
+          <div><b>№ SZ-2026-004217</b><br>sozqala.kz/verify</div>
+          <div class="c-seal" data-i18n="tier.gold">Алтын</div>
+          <svg class="c-qr" id="qr" viewBox="0 0 21 21" shape-rendering="crispEdges"></svg>
+        </div>
+      </div>
+      <div>
+        <div class="label" data-i18n="s8.tiers">Деңгейлер (шектерін мұғалім/әкімші баптайды)</div>
+        <div class="tier-row">
+          <span class="tier"><i style="--t:var(--tier-bronze)"></i><span data-i18n="tier.bronze">Қола</span></span>
+          <span class="tier"><i style="--t:var(--tier-silver)"></i><span data-i18n="tier.silver">Күміс</span></span>
+          <span class="tier"><i style="--t:var(--tier-gold)"></i><span data-i18n="tier.gold">Алтын</span></span>
+          <span class="tier"><i style="--t:var(--tier-platinum)"></i><span data-i18n="tier.platinum">Платина</span></span>
+        </div>
+        <div class="card verify" style="margin-top:20px">
+          <div class="ok"><i data-lucide="badge-check"></i></div>
+          <h3 data-i18n="v.title">Сертификат жарамды</h3>
+          <dl class="kv" style="text-align:left;margin-top:12px">
+            <dt>№</dt><dd>SZ-2026-004217</dd>
+            <dt data-i18n="v.level">Деңгей</dt><dd data-i18n="tier.gold">Алтын</dd>
+            <dt data-i18n="v.date">Берілген күні</dt><dd>18.11.2026</dd>
+          </dl>
+          <p class="note" style="margin-top:10px" data-i18n="v.privacy">Оқушының аты-жөні мен мектебі жария көрсетілмейді.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 9. MOTION ============================== -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">09</span><h2 data-i18n="s9.title">Қозғалыс</h2></div>
+    <div class="motion-demo">
+      <div class="card"><h3 data-i18n="m1.t">Құрылыс</h3><p class="note" data-i18n="m1.d">Ғимарат төменнен «өседі» (900ms, bounce) + шаң бұлттары. Тек деңгей өскенде.</p></div>
+      <div class="card"><h3 data-i18n="m2.t">Тірі қала</h3><p class="note" data-i18n="m2.d">Желбіреген тулар, субұрқақ, жыпылықтаған жұлдыздар — 5-деңгейде.</p></div>
+      <div class="card"><h3 data-i18n="m3.t">Басу</h3><p class="note" data-i18n="m3.d">Түймелер 4px «басылады». Hover-де ғимарат көтеріледі.</p></div>
+      <div class="card"><h3 data-i18n="m4.t">Қолжетімділік</h3><p class="note" data-i18n="m4.d">prefers-reduced-motion кезінде барлық анимация өшеді.</p></div>
+    </div>
+    <div class="toast" style="margin-top:20px;max-width:420px"><i data-lucide="party-popper"></i><span data-i18n="toast.built">Грамматика сарайы 4-деңгейге көтерілді!</span></div>
+  </div>
+</section>
+</main>
+
+<footer class="footer"><div class="wrap" data-i18n="footer">СӨЗҚАЛА · Stage 0 design system · tokens.css + iso-engine.js → Stage 1/4</div></footer>
+
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="iso/iso-engine.js"></script>
+<script src="iso/buildings.js"></script>
+<script src="preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+@import "tailwindcss";
+/* Single source of truth for colours, type, radii, motion and iso animations (Stage 0). */
+@import "../design/tokens.css";
+
+/* next/font generates hashed family names, so point the token fonts at them. */
+:root {
+  --font-display: var(--font-rubik), var(--font-nunito), system-ui, sans-serif;
+  --font-body: var(--font-nunito), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Map tokens → Tailwind utilities. `inline` = utilities reference the token
+   variables directly, so changing tokens.css restyles the whole app. */
+@theme inline {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* semantic */
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-alt: var(--color-surface-alt);
+  --color-fg: var(--color-text);
+  --color-muted: var(--color-text-muted);
+  --color-line: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-edge: var(--color-primary-edge);
+  --color-on-primary: var(--color-on-primary);
+  --color-accent: var(--color-accent);
+  --color-accent-edge: var(--color-accent-edge);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+  --color-focus: var(--color-focus);
+
+  /* brand scales */
+  --color-sky-50: var(--sz-sky-50);
+  --color-sky-100: var(--sz-sky-100);
+  --color-sky-300: var(--sz-sky-300);
+  --color-sky-500: var(--sz-sky-500);
+  --color-sky-600: var(--sz-sky-600);
+  --color-sky-700: var(--sz-sky-700);
+  --color-sun-100: var(--sz-sun-100);
+  --color-sun-300: var(--sz-sun-300);
+  --color-sun-500: var(--sz-sun-500);
+  --color-sun-600: var(--sz-sun-600);
+  --color-sun-700: var(--sz-sun-700);
+  --color-coral-100: var(--sz-coral-100);
+  --color-coral-500: var(--sz-coral-500);
+  --color-coral-700: var(--sz-coral-700);
+  --color-grass-100: var(--sz-grass-100);
+  --color-grass-500: var(--sz-grass-500);
+  --color-grass-700: var(--sz-grass-700);
+  --color-violet-100: var(--sz-violet-100);
+  --color-violet-500: var(--sz-violet-500);
+  --color-violet-700: var(--sz-violet-700);
+  --color-ink-100: var(--sz-ink-100);
+  --color-ink-300: var(--sz-ink-300);
+  --color-ink-500: var(--sz-ink-500);
+  --color-ink-700: var(--sz-ink-700);
+  --color-ink-900: var(--sz-ink-900);
+  --color-paper: var(--sz-paper);
+  --color-cream: var(--sz-cream);
+
+  /* roles, scores, tiers */
+  --color-role-student: var(--role-student);
+  --color-role-teacher: var(--role-teacher);
+  --color-role-parent: var(--role-parent);
+  --color-role-admin: var(--role-admin);
+  --color-score-0: var(--score-0);
+  --color-score-1: var(--score-1);
+  --color-score-2: var(--score-2);
+  --color-score-3: var(--score-3);
+  --color-score-4: var(--score-4);
+  --color-score-5: var(--score-5);
+  --color-tier-bronze: var(--tier-bronze);
+  --color-tier-silver: var(--tier-silver);
+  --color-tier-gold: var(--tier-gold);
+  --color-tier-platinum: var(--tier-platinum);
+
+  /* type */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-4xl: var(--text-4xl);
+
+  /* shape & motion */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
+  --ease-out: var(--ease-out);
+  --ease-bounce: var(--ease-bounce);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  /* A single-column grid must not grow wider than the screen because of one wide
+     child (long titles on phones). In the base layer, so any grid-cols-* utility
+     still wins at its breakpoint. */
+  #main .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  /* Chunky "game" button (spec: design/preview.css .btn). Colours come from
+     --b (face), --edge (3D edge) and --fg (text), set by the Button variants. */
+  .btn-3d {
+    --b: var(--color-primary);
+    --edge: var(--color-primary-edge);
+    --fg: var(--color-on-primary);
+    --depth: var(--edge-depth);
+    color: var(--fg);
+    background: var(--b);
+    box-shadow: 0 var(--depth) 0 var(--edge);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      filter var(--dur-fast);
+  }
+  .btn-3d:hover {
+    filter: brightness(1.05);
+  }
+  .btn-3d:active:not(:disabled) {
+    transform: translateY(var(--depth));
+    box-shadow: 0 0 0 var(--edge);
+  }
+  .btn-3d:disabled,
+  .btn-3d[aria-disabled="true"] {
+    --b: var(--sz-ink-100);
+    --edge: var(--sz-ink-300);
+    --fg: var(--sz-ink-500);
+    cursor: not-allowed;
+    filter: none;
+  }
+
+  /* Striped progress fill (city completion). */
+  .progress-stripes {
+    background: repeating-linear-gradient(-45deg, var(--sz-sun-500) 0 10px, var(--sz-sun-300) 10px 20px);
+  }
+  .progress-stripes-sky {
+    background: repeating-linear-gradient(-45deg, var(--sz-sky-500) 0 10px, var(--sz-sky-300) 10px 20px);
+  }
+
+  /* Isometric city (components/city). The SVG is injected markup, so it is styled here. */
+  .city-host svg,
+  .iso-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform-origin: 0 0;
+  }
+  .iso-city .plot {
+    cursor: pointer;
+    transition:
+      transform var(--dur-base) var(--ease-bounce),
+      filter var(--dur-base);
+  }
+  .iso-city .plot--square {
+    cursor: default;
+  }
+  .iso-city .plot:not(.plot--square):hover,
+  .iso-city .plot:not(.plot--square):focus-visible {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 10px 6px rgba(30, 42, 59, 0.18));
+    outline: none;
+  }
+  .iso-city .plot.is-selected {
+    filter: drop-shadow(0 0 0 #fff) drop-shadow(0 0 10px rgba(0, 175, 202, 0.9));
+  }
+
+  .sky-gradient {
+    background: linear-gradient(180deg, var(--iso-sky-top), var(--iso-sky-bottom) 70%, var(--color-bg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
