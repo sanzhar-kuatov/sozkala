@@ -22,7 +22,9 @@
     "setup": "node scripts/init-env.mjs && prisma migrate deploy && prisma generate && prisma db seed",
     "test:e2e": "next build && playwright test",
     "db:remote": "node scripts/remote-db.mjs",
-    "db:remote:seed": "node scripts/remote-db.mjs --seed"
+    "db:remote:seed": "node scripts/remote-db.mjs --seed",
+    "tasks:build": "python scripts/task-bank/build-bank.py",
+    "tasks:import": "tsx scripts/import-task-bank.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
