@@ -30,13 +30,23 @@ export type CityView = {
   levelUps: { id: string; key: BuildingKey; level: number }[];
 };
 
-/** Ids of published tasks assigned to the student (via their classes or personally). */
+/**
+ * Ids of published tasks assigned to the student (via their classes or personally),
+ * limited to the grades the student studies in: a 5th-grader never gets a 6th-grade
+ * task, even if an assignment slipped through.
+ */
 export async function assignedTaskIds(studentId: string) {
-  const classIds = (await db.classMember.findMany({ where: { studentId }, select: { classId: true } })).map(
-    (m) => m.classId,
-  );
+  const memberships = await db.classMember.findMany({
+    where: { studentId },
+    select: { classId: true, class: { select: { grade: true } } },
+  });
+  const classIds = memberships.map((m) => m.classId);
+  const grades = [...new Set(memberships.map((m) => m.class.grade))];
   const assignments = await db.taskAssignment.findMany({
-    where: { OR: [{ classId: { in: classIds } }, { studentId }], task: { status: "PUBLISHED" } },
+    where: {
+      OR: [{ classId: { in: classIds } }, { studentId }],
+      task: { status: "PUBLISHED", grade: { in: grades } },
+    },
     select: { taskId: true, isRequired: true, deadline: true },
   });
   return { classIds, assignments };

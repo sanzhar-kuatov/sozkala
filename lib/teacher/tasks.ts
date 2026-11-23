@@ -8,7 +8,10 @@ import { assertOwnsTask } from "./access";
 const ownTasks = (user: SessionUser) => (user.role === "ADMIN" ? {} : { authorId: user.id });
 
 /** Task bank with filters (spec §2.2 "manage tasks"). */
-export async function listTasks(user: SessionUser, filter: { building?: string; status?: string; q?: string }) {
+export async function listTasks(
+  user: SessionUser,
+  filter: { building?: string; status?: string; q?: string; grade?: number },
+) {
   return db.task.findMany({
     where: {
       ...ownTasks(user),
@@ -17,14 +20,16 @@ export async function listTasks(user: SessionUser, filter: { building?: string; 
         ? { status: filter.status as TaskStatus }
         : { status: { not: "ARCHIVED" } }),
       ...(filter.q ? { title: { contains: filter.q } } : {}),
+      ...(filter.grade ? { grade: filter.grade } : {}),
     },
-    orderBy: [{ building: { sortOrder: "asc" } }, { createdAt: "desc" }],
+    orderBy: [{ grade: "asc" }, { building: { sortOrder: "asc" } }, { createdAt: "desc" }],
     select: {
       id: true,
       title: true,
       type: true,
       grading: true,
       status: true,
+      grade: true,
       difficulty: true,
       building: { select: { key: true } },
       topic: { select: { title: true } },
@@ -48,6 +53,7 @@ export async function getTaskForEditor(user: SessionUser, taskId: string) {
       answerKey: true,
       criteria: true,
       explanation: true,
+      grade: true,
       difficulty: true,
       timeLimitSec: true,
       maxAttempts: true,

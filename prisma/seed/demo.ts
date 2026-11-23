@@ -25,6 +25,8 @@ import { DEMO_TASKS, DEMO_TOPICS } from "./demo-tasks";
 
 const SCHOOL_ID = "demo-school";
 const CLASS_ID = "demo-class-7a";
+/** 7«Ә» is a 7th-grade class, so all demo tasks are 7th-grade tasks. */
+const GRADE = 7;
 const INVITE_CODE = "SOZ7A1";
 
 type Person = { login: string; firstName: string; lastName: string; cityName?: string };
@@ -149,7 +151,7 @@ export async function seedDemo(db: PrismaClient) {
       schoolId: SCHOOL_ID,
       teacherId: teacher.id,
       name: "7«Ә»",
-      grade: 7,
+      grade: GRADE,
       academicYear: "2026-2027",
       inviteCode: INVITE_CODE,
       members: { create: Object.values(students).map((s) => ({ studentId: s.id, joinedAt: daysAgo(14, 9) })) },
@@ -202,6 +204,7 @@ export async function seedDemo(db: PrismaClient) {
         answerKey: parsed.answerKey ?? undefined,
         criteria: parsed.criteria ?? undefined,
         explanation: t.explanation,
+        grade: GRADE,
         difficulty: t.difficulty,
         timeLimitSec: t.timeLimitSec,
         maxAttempts: t.maxAttempts,

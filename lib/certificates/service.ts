@@ -53,9 +53,12 @@ async function computeStatus(tx: Tx, studentId: string) {
     select: { class: { select: { id: true, name: true, school: { select: { name: true } } } } },
   });
   const klass = membership?.class ?? null;
-  const classIds = (await tx.classMember.findMany({ where: { studentId }, select: { classId: true } })).map(
-    (m) => m.classId,
-  );
+  const memberships = await tx.classMember.findMany({
+    where: { studentId },
+    select: { classId: true, class: { select: { grade: true } } },
+  });
+  const classIds = memberships.map((m) => m.classId);
+  const grades = [...new Set(memberships.map((m) => m.class.grade))];
 
   const [policy, types, configs, progress, assignments, gradedTasks] = await Promise.all([
     policyFor(tx, klass?.id ?? null),
@@ -71,7 +74,10 @@ async function computeStatus(tx: Tx, studentId: string) {
       select: { buildingTypeId: true, level: true, score: true },
     }),
     tx.taskAssignment.findMany({
-      where: { OR: [{ classId: { in: classIds } }, { studentId }], task: { status: "PUBLISHED" } },
+      where: {
+        OR: [{ classId: { in: classIds } }, { studentId }],
+        task: { status: "PUBLISHED", grade: { in: grades } }, // same rule as lib/student/city.ts
+      },
       select: { taskId: true, isRequired: true, task: { select: { title: true } } },
     }),
     tx.attempt.findMany({

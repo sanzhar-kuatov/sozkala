@@ -23,6 +23,7 @@ const metaSchema = z.object({
   type: z.enum(Object.values(TaskType) as [TaskTypeValue, ...TaskTypeValue[]]),
   building: z.string().refine(isBuildingKey),
   topicId: z.string().max(40).optional().nullable(),
+  grade: z.number().int().min(5).max(11),
   difficulty: z.number().int().min(1).max(3),
   timeLimitMin: z.number().int().min(1).max(240).nullable(),
   maxAttempts: z.number().int().min(1).max(20).nullable(),
@@ -32,7 +33,12 @@ const metaSchema = z.object({
 export type SaveTaskInput = { meta: z.input<typeof metaSchema>; draft: TaskDraft; publish: boolean };
 export type SaveTaskResult =
   | { ok: true; id: string }
-  | { ok: false; error: DraftError | "invalidMeta" | "locked" | "invalid"; question?: number; detail?: string };
+  | {
+      ok: false;
+      error: DraftError | "invalidMeta" | "locked" | "invalid" | "gradeAssigned";
+      question?: number;
+      detail?: string;
+    };
 
 /** Create or update a task from the editor (wireframe §4.2 steps 1–4). */
 export async function saveTask(taskId: string | null, input: SaveTaskInput): Promise<SaveTaskResult> {
@@ -65,12 +71,16 @@ export async function saveTask(taskId: string | null, input: SaveTaskInput): Pro
     if (current.type !== m.type) return { ok: false, error: "locked" };
   }
 
+  // A task can't move to another grade while classes/students of the old grade still have it.
+  if (taskId && (await assignedOutsideGrade(taskId, m.grade))) return { ok: false, error: "gradeAssigned" };
+
   const building = await db.buildingType.findUniqueOrThrow({ where: { key: m.building }, select: { id: true } });
   const data = {
     title: m.title,
     instruction: m.instruction,
     buildingTypeId: building.id,
     topicId: m.topicId || null,
+    grade: m.grade,
     difficulty: m.difficulty,
     timeLimitSec: m.timeLimitMin ? m.timeLimitMin * 60 : null,
     maxAttempts: m.maxAttempts,
@@ -138,6 +148,7 @@ export async function duplicateTask(taskId: string) {
       answerKey: t.answerKey ?? undefined,
       criteria: t.criteria ?? undefined,
       explanation: t.explanation,
+      grade: t.grade,
       difficulty: t.difficulty,
       timeLimitSec: t.timeLimitSec,
       maxAttempts: t.maxAttempts,
@@ -169,7 +180,27 @@ export async function deleteTask(taskId: string) {
 
 /* -------------------------------------------------------------- assignments */
 
-export type AssignResult = { ok?: boolean; error?: "invalid" | "forbidden" } | undefined;
+export type AssignResult = { ok?: boolean; error?: "invalid" | "forbidden" | "wrongGrade" } | undefined;
+
+/** Is the task assigned to a class, or a student with no class, of a grade other than `grade`? */
+async function assignedOutsideGrade(taskId: string, grade: number) {
+  const assignments = await db.taskAssignment.findMany({
+    where: { taskId },
+    select: {
+      class: { select: { grade: true } },
+      student: { select: { memberships: { select: { class: { select: { grade: true } } } } } },
+    },
+  });
+  return assignments.some((a) =>
+    a.class ? a.class.grade !== grade : !a.student?.memberships.some((m) => m.class.grade === grade),
+  );
+}
+
+/** The grades a student studies in (from their classes). */
+async function gradesOfStudent(studentId: string) {
+  const rows = await db.classMember.findMany({ where: { studentId }, select: { class: { select: { grade: true } } } });
+  return [...new Set(rows.map((r) => r.class.grade))];
+}
 
 const assignSchema = z.object({
   target: z.string().regex(/^(class|student):[A-Za-z0-9_-]{1,40}$/),
@@ -195,6 +226,15 @@ export async function assignTask(taskId: string, _prev: AssignResult, formData: 
     if (e instanceof AuthError) return { error: "forbidden" };
     throw e;
   }
+  // Grade rule: a task for grade N goes only to grade-N classes and to students who study in grade N.
+  const task = await db.task.findUniqueOrThrow({ where: { id: taskId }, select: { grade: true } });
+  if (kind === "class") {
+    const klass = await db.schoolClass.findUniqueOrThrow({ where: { id }, select: { grade: true } });
+    if (klass.grade !== task.grade) return { error: "wrongGrade" };
+  } else if (!(await gradesOfStudent(id)).includes(task.grade)) {
+    return { error: "wrongGrade" };
+  }
+
   // Deadline = end of the chosen day, Almaty time (UTC+5).
   const deadline = parsed.data.deadline ? new Date(`${parsed.data.deadline}T23:59:00+05:00`) : null;
   if (deadline && Number.isNaN(deadline.getTime())) return { error: "invalid" };

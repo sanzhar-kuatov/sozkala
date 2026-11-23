@@ -15,8 +15,15 @@ const schema = z.object({
 
 // On Vercel, APP_URL defaults to the production domain (QR codes on certificates point there).
 const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+// `next build` imports server modules to collect page data but never queries the
+// database or signs sessions, so a build must not need the secrets (Vercel builds
+// without them). Placeholders are used ONLY while building; at runtime the real
+// values are required and validated as before.
+const building = process.env.NEXT_PHASE === "phase-production-build";
 const parsed = schema.safeParse({
   ...process.env,
+  DATABASE_URL: process.env.DATABASE_URL || (building ? "file:./build-placeholder.db" : undefined),
+  AUTH_SECRET: process.env.AUTH_SECRET || (building ? "build-time-placeholder-not-a-real-secret" : undefined),
   APP_URL: process.env.APP_URL || (vercelUrl ? `https://${vercelUrl}` : undefined),
 });
 

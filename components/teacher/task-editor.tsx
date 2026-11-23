@@ -23,6 +23,8 @@ export type EditorMeta = {
   type: TaskTypeValue;
   building: BuildingKey;
   topicId: string | null;
+  /** School year 5–11: only classes and students of this grade can get the task. */
+  grade: number;
   difficulty: number;
   timeLimitMin: number | null;
   maxAttempts: number | null;
@@ -170,6 +172,16 @@ export function TaskEditor({ taskId, initialMeta, initialDraft, topics, locked }
           </label>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="grid gap-1 text-sm font-extrabold">
+            {t("grade")}
+            <Select value={meta.grade} onChange={(e) => setM({ grade: Number(e.target.value) })}>
+              {[5, 6, 7, 8, 9, 10, 11].map((g) => (
+                <option key={g} value={g}>
+                  {t("gradeN", { n: g })}
+                </option>
+              ))}
+            </Select>
+          </label>
           <label className="grid gap-1 text-sm font-extrabold">
             {t("timeLimit")}
             <Input

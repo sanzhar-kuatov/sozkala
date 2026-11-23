@@ -26,6 +26,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/[locale]/t
     building: typeof sp.building === "string" ? sp.building : undefined,
     status: typeof sp.status === "string" ? sp.status : undefined,
     q: typeof sp.q === "string" ? sp.q.slice(0, 80) : undefined,
+    grade: typeof sp.grade === "string" && /^(5|6|7|8|9|10|11)$/.test(sp.grade) ? Number(sp.grade) : undefined,
   };
   const tasks = await listTasks(user, filter);
   const t = await getTranslations("teacher.tasks");
@@ -43,7 +44,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/[locale]/t
       </div>
 
       {/* GET form: filters live in the URL, so they survive reloads and can be shared */}
-      <form className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_220px_180px_auto]">
+      <form className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_140px_220px_180px_auto]">
         <input
           name="q"
           defaultValue={filter.q}
@@ -51,6 +52,14 @@ export default async function TasksPage({ searchParams }: PageProps<"/[locale]/t
           aria-label={t("search")}
           className="min-h-12 rounded-md border-2 border-ink-100 bg-surface px-3.5 font-semibold focus:border-primary focus:outline-none"
         />
+        <Select name="grade" defaultValue={filter.grade ?? ""} aria-label={t("grade")}>
+          <option value="">{t("allGrades")}</option>
+          {[5, 6, 7, 8, 9, 10, 11].map((g) => (
+            <option key={g} value={g}>
+              {t("gradeN", { n: g })}
+            </option>
+          ))}
+        </Select>
         <Select name="building" defaultValue={filter.building ?? ""} aria-label={t("building")}>
           <option value="">{t("allBuildings")}</option>
           {BUILDINGS.map((b) => (
@@ -96,6 +105,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/[locale]/t
                         {` · ${t("assigned", { count: task._count.assignments })} · ${t("submissions", { count: task._count.attempts })}`}
                       </p>
                     </div>
+                    <Chip tone="student">{t("gradeN", { n: task.grade })}</Chip>
                     <Chip tone={STATUS_TONE[task.status]}>{t(`statuses.${task.status}`)}</Chip>
                     <ChevronRight className="size-5 text-ink-300" aria-hidden />
                   </Card>

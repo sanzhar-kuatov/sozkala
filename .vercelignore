@@ -1,15 +1,17 @@
-# Never upload local data or secrets to Vercel
-.env
-.env.*
-!.env.example
-prisma/*.db
-prisma/*.db-*
-uploads/
-uploads-e2e/
-backups/
-backups-e2e/
-node_modules/
-.next/
-generated/
-test-results/
-playwright-report/
+# Never upload local data or secrets to Vercel.
+# Patterns start with "/" so they match only at the project root
+# (an unanchored "backups/" also removed app/[locale]/admin/backups/!).
+/.env
+/.env.*
+!/.env.example
+/prisma/*.db
+/prisma/*.db-*
+/uploads/
+/uploads-e2e/
+/backups/
+/backups-e2e/
+/node_modules/
+/.next/
+/generated/
+/test-results/
+/playwright-report/

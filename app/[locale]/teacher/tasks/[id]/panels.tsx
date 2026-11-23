@@ -19,10 +19,13 @@ type Assignment = {
 /** Assign to a class or a student (wireframe §4.2 step 5). */
 export function AssignmentsPanel({
   taskId,
+  grade,
   assignments,
   targets,
 }: {
   taskId: string;
+  /** Only classes of this grade (and their students) are offered — the server enforces it too. */
+  grade: number;
   assignments: Assignment[];
   targets: { value: string; label: string; group: "class" | "student" }[];
 }) {
@@ -31,7 +34,10 @@ export function AssignmentsPanel({
   const [removing, start] = useTransition();
   return (
     <div className="grid gap-3">
-      <h2 className="text-lg font-bold">{t("title")}</h2>
+      <div>
+        <h2 className="text-lg font-bold">{t("title")}</h2>
+        <p className="text-xs text-muted">{t("gradeHint", { n: grade })}</p>
+      </div>
       {assignments.length === 0 ? (
         <p className="text-sm text-muted">{t("none")}</p>
       ) : (
@@ -59,6 +65,7 @@ export function AssignmentsPanel({
           ))}
         </ul>
       )}
+      {targets.length === 0 && <p className="text-sm font-bold text-sun-700">{t("noClassOfGrade", { n: grade })}</p>}
       <form action={action} className="grid gap-2 border-t border-dashed border-line pt-3">
         <Select name="target" required aria-label={t("target")} defaultValue="">
           <option value="" disabled>

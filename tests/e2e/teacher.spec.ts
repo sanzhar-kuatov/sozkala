@@ -7,11 +7,12 @@ async function asTeacher(page: Page) {
 }
 
 /** Creates a single-choice task through the editor and returns its URL. */
-async function createSingleChoiceTask(page: Page, title: string, building: string) {
+async function createSingleChoiceTask(page: Page, title: string, building: string, grade?: string) {
   await page.goto("/kk/teacher/tasks/new");
   await page.getByLabel("Атауы", { exact: true }).fill(title);
   await page.getByLabel("Нұсқаулық (оқушыға)").fill("Выберите один ответ.");
   await page.getByLabel("Ғимарат").selectOption(building);
+  if (grade) await page.getByLabel("Қай сыныпқа арналған").selectOption(grade);
   await page.getByLabel("Сұрақ мәтіні").fill("Синоним к слову «смелый»?");
   await page.getByLabel("1-нұсқа", { exact: true }).fill("храбрый");
   await page.getByLabel("2-нұсқа", { exact: true }).fill("робкий");
@@ -45,7 +46,7 @@ test.describe("teacher cabinet (Stage 7)", () => {
     expect(login).toBe("erasyl.t");
 
     // task → publish → assign to the class
-    await createSingleChoiceTask(page, "Тест: синоним", "tower");
+    await createSingleChoiceTask(page, "Тест: синоним", "tower", "8"); // 8«Б» is an 8th-grade class
     await page.getByLabel("Кімге").selectOption({ label: "8«Б»" });
     await page.getByRole("button", { name: "Тағайындау", exact: true }).click();
     await expect(page.locator("li", { hasText: "8«Б»" }).getByText("Міндетті")).toBeVisible();

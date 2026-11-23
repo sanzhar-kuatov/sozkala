@@ -36,7 +36,8 @@ export default async function EditTaskPage({ params }: PageProps<"/[locale]/teac
       select: { id: true, title: true, building: { select: { key: true } } },
     }),
     db.schoolClass.findMany({
-      where: { teacherId: user.id, archivedAt: null },
+      // only classes of the task's grade can get it (see assignTask)
+      where: { teacherId: user.id, archivedAt: null, grade: task.grade },
       orderBy: { name: "asc" },
       select: {
         id: true,
@@ -78,6 +79,7 @@ export default async function EditTaskPage({ params }: PageProps<"/[locale]/teac
             type,
             building: task.building.key as BuildingKey,
             topicId: task.topicId,
+            grade: task.grade,
             difficulty: task.difficulty,
             timeLimitMin: task.timeLimitSec ? Math.round(task.timeLimitSec / 60) : null,
             maxAttempts: task.maxAttempts,
@@ -124,6 +126,7 @@ export default async function EditTaskPage({ params }: PageProps<"/[locale]/teac
           <Card>
             <AssignmentsPanel
               taskId={task.id}
+              grade={task.grade}
               assignments={task.assignments.map((a) => ({
                 id: a.id,
                 isRequired: a.isRequired,

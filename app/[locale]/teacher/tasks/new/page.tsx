@@ -15,11 +15,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function NewTaskPage() {
   const user = await requireRole("TEACHER");
   const t = await getTranslations("teacher.tasks");
-  const topics = await db.topic.findMany({
-    where: { authorId: user.id },
-    orderBy: { title: "asc" },
-    select: { id: true, title: true, building: { select: { key: true } } },
-  });
+  const [topics, firstClass] = await Promise.all([
+    db.topic.findMany({
+      where: { authorId: user.id },
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, building: { select: { key: true } } },
+    }),
+    // default grade = the grade the teacher teaches (first active class)
+    db.schoolClass.findFirst({
+      where: { teacherId: user.id, archivedAt: null },
+      orderBy: [{ grade: "asc" }, { name: "asc" }],
+      select: { grade: true },
+    }),
+  ]);
 
   return (
     <div className="grid gap-4">
@@ -38,6 +46,7 @@ export default async function NewTaskPage() {
           type: "SINGLE_CHOICE",
           building: "grammar",
           topicId: null,
+          grade: firstClass?.grade ?? 5,
           difficulty: 2,
           timeLimitMin: 10,
           maxAttempts: 3,

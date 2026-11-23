@@ -196,3 +196,11 @@ E-mail delivery is a later adapter; the rows already hold everything a message n
   - `AuditLog` can be filtered by action prefix and actor login.
   - `ErrorLog` is written by `lib/errors.ts`, both from `instrumentation.ts` (`onRequestError`: path without query, method, route, kind; never headers or bodies) and from caught background failures (e.g. the certificate check).
 - **Backups:** `lib/admin/backups.ts` (`VACUUM INTO`, file names `sozqala-YYYYMMDD-HHMMSS[-n].db` validated by a regex). Downloads go through `/api/admin/backups/[name]`, which only admins can use.
+
+## Tasks by grade
+
+- Every `Task` has a `grade` (5–11). The migration `task_grade` filled existing tasks from the classes they were assigned to.
+- A grade-N task can be assigned only to grade-N classes, or to students who are members of a grade-N class (`assignTask`). The editor offers only those targets.
+- A task's grade can't change while it is assigned outside the new grade (`gradeAssigned`). To reuse a task for another grade, duplicate it.
+- Defence in depth: `assignedTaskIds()` and the certificate check only count published tasks whose grade is one of the student's class grades. A wrong assignment row never reaches a student.
+

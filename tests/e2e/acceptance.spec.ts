@@ -5,9 +5,10 @@ import { loginAs, logout, sql } from "./helpers";
 /**
  * Spec §14 — the 10 acceptance tests, run as ONE journey along the student path
  * of spec §13, with a brand-new class, student and parent (nothing from the demo
- * accounts is changed). Grade 11 keeps the demo class 7«Ә» first in teacher lists.
+ * accounts is changed). It reuses two demo tasks, which are 7th-grade tasks, so the class is a
+ * 7th-grade class; its name sorts after 7«Ә», which stays first in teacher lists.
  */
-const CLASS = "11«В»";
+const CLASS = "7«Ә»-2";
 const PRE_PRI = "ПРЕ- или ПРИ-?";
 const ESSAY = "Эссе «Мой любимый литературный герой»";
 
@@ -69,7 +70,7 @@ test.describe.serial("acceptance tests (spec §14) along the student path (spec 
 
     await page.goto("/kk/teacher/classes");
     await page.getByLabel("Атауы").fill(CLASS);
-    await page.getByLabel("Сынып", { exact: true }).selectOption("11");
+    await page.getByLabel("Сынып", { exact: true }).selectOption("7");
     await page.getByRole("button", { name: "Сынып құру" }).click();
     await expect(page.getByRole("heading", { level: 1, name: CLASS })).toBeVisible();
     const classUrl = page.url();
