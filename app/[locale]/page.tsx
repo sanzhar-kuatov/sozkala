@@ -68,10 +68,11 @@ export default async function LandingPage() {
                 </Link>
               </div>
             </div>
-            {/* Decorative sample city, drawn live by the same engine as the students' cities. */}
+            {/* Decorative sample city, drawn live by the same engine as the students' cities.
+                Toned down here (darker, less saturated) so the landing page looks less toy-like. */}
             <div
               aria-hidden
-              className="city-host pointer-events-none drop-shadow-[0_24px_30px_rgba(30,42,59,.18)]"
+              className="city-host pointer-events-none brightness-[.88] saturate-[.78] drop-shadow-[0_24px_30px_rgba(30,42,59,.18)]"
               dangerouslySetInnerHTML={{ __html: HERO_CITY }}
             />
           </div>
