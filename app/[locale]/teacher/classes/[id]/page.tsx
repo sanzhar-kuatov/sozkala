@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, ArrowLeft, ChevronRight, Landmark } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, ChevronRight, Landmark, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -9,7 +9,8 @@ import { Link } from "@/i18n/navigation";
 import { requireRole } from "@/lib/auth/guards";
 import { env } from "@/lib/env";
 import { getClassDetail } from "@/lib/teacher/classes";
-import { setClassArchived } from "../actions";
+import { ConfirmForm } from "@/components/teacher/confirm-form";
+import { deleteClass, setClassArchived } from "../actions";
 import { AddStudentForm, InviteCard, StudentActions } from "./class-client";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -53,7 +54,16 @@ export default async function ClassPage({ params }: PageProps<"/[locale]/teacher
             {klass.archivedAt ? t("restore") : t("archive")}
           </Button>
         </form>
+        <ConfirmForm
+          action={deleteClass.bind(null, klass.id)}
+          variant="danger"
+          confirm={t("deleteConfirm", { name: klass.name, count: klass.students.length })}
+        >
+          <Trash2 aria-hidden />
+          {t("delete")}
+        </ConfirmForm>
       </div>
+      <p className="-mt-3 text-xs text-muted">{t("archiveHint")}</p>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-labelledby="students-title" className="grid content-start gap-3">

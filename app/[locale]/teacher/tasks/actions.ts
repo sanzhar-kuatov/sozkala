@@ -9,6 +9,7 @@ import { redirect } from "@/i18n/navigation";
 import { audit } from "@/lib/audit";
 import { AuthError, authorize } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
+import { deleteAudioFiles } from "@/lib/storage";
 import { isBuildingKey } from "@/lib/domain/buildings";
 import { DraftInvalid, fromDraft, type DraftError, type TaskDraft } from "@/lib/tasks/authoring";
 import { gradingFor, parseTask, type TaskTypeValue } from "@/lib/tasks/schemas";
@@ -164,16 +165,24 @@ export async function duplicateTask(taskId: string) {
   redirect({ href: `/teacher/tasks/${copy.id}`, locale: await getLocale() });
 }
 
-/** Delete a task that nobody has answered yet; otherwise archive it. */
+/**
+ * Deletes the task for good, with its assignments, materials and every student
+ * answer (audio files too). Building levels and certificates already earned stay:
+ * levels never go down, and level events keep their history with attemptId = null.
+ */
 export async function deleteTask(taskId: string) {
   const user = await authorize(["TEACHER", "ADMIN"], { write: true });
   await assertOwnsTask(user, taskId);
-  if (await contentLocked(taskId)) {
-    await db.task.update({ where: { id: taskId }, data: { status: "ARCHIVED" } });
-  } else {
-    await db.task.delete({ where: { id: taskId } });
-  }
-  await audit({ actorId: user.id, action: "task.delete", entity: "Task", entityId: taskId });
+  const attempts = await db.attempt.findMany({ where: { taskId }, select: { id: true } });
+  await db.task.delete({ where: { id: taskId } });
+  const files = await deleteAudioFiles(attempts.map((a) => a.id));
+  await audit({
+    actorId: user.id,
+    action: "task.delete",
+    entity: "Task",
+    entityId: taskId,
+    data: { attempts: attempts.length, files },
+  });
   refresh();
   redirect({ href: "/teacher/tasks", locale: await getLocale() });
 }

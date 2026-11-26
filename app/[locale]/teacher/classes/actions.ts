@@ -118,6 +118,21 @@ export async function setClassArchived(classId: string, archived: boolean) {
   refresh();
 }
 
+/**
+ * Deletes the class for good: membership list, assignments to the class, building
+ * settings and certificate rules go with it. Student and parent accounts, cities,
+ * results and certificates stay (certificates keep classId = null).
+ */
+export async function deleteClass(classId: string) {
+  const user = await authorize(["TEACHER", "ADMIN"], { write: true });
+  await assertTeachesClass(user, classId);
+  const members = await db.classMember.count({ where: { classId } });
+  await db.schoolClass.delete({ where: { id: classId } });
+  await audit({ actorId: user.id, action: "class.delete", entity: "SchoolClass", entityId: classId, data: { members } });
+  refresh();
+  redirect({ href: "/teacher/classes", locale: await getLocale() });
+}
+
 /** New invite code; the old link stops working. */
 export async function regenerateInvite(classId: string) {
   const user = await authorize(["TEACHER", "ADMIN"], { write: true });

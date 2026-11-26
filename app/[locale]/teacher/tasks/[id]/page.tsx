@@ -1,7 +1,8 @@
-import { Archive, ArrowLeft, Copy, EyeOff, Send, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Copy, EyeOff, Send, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { ConfirmForm } from "@/components/teacher/confirm-form";
 import { TaskEditor } from "@/components/teacher/task-editor";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -115,13 +116,35 @@ export default async function EditTaskPage({ params }: PageProps<"/[locale]/teac
                   {t("duplicate")}
                 </Button>
               </form>
-              <form action={deleteTask.bind(null, task.id)}>
-                <Button type="submit" size="sm" variant="ghost">
-                  {locked ? <Archive aria-hidden /> : <Trash2 aria-hidden />}
-                  {locked ? t("archive") : t("delete")}
-                </Button>
-              </form>
+              {task.status === "ARCHIVED" ? (
+                <form action={setTaskStatus.bind(null, task.id, "DRAFT")}>
+                  <Button type="submit" size="sm" variant="ghost">
+                    <ArchiveRestore aria-hidden />
+                    {t("restore")}
+                  </Button>
+                </form>
+              ) : (
+                <form action={setTaskStatus.bind(null, task.id, "ARCHIVED")}>
+                  <Button type="submit" size="sm" variant="ghost">
+                    <Archive aria-hidden />
+                    {t("archive")}
+                  </Button>
+                </form>
+              )}
+              <ConfirmForm
+                action={deleteTask.bind(null, task.id)}
+                variant="danger"
+                confirm={
+                  task._count.attempts > 0
+                    ? t("deleteConfirmAnswers", { count: task._count.attempts })
+                    : t("deleteConfirm")
+                }
+              >
+                <Trash2 aria-hidden />
+                {t("delete")}
+              </ConfirmForm>
             </div>
+            <p className="text-xs text-muted">{t("archiveHint")}</p>
           </Card>
           <Card>
             <AssignmentsPanel

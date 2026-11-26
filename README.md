@@ -112,7 +112,10 @@ proxy.ts                    locale routing (Next 16 "proxy" = former middleware)
 
 ## Documentation
 
+- What the platform is, roles, logins, in plain words: [docs/about.md](docs/about.md)
 - User guides by role: [Kazakh](docs/user-guide.kk.md) · [Russian](docs/user-guide.ru.md)
+- Installing offline on a school network (Windows, no internet): [docs/deploy-offline.md](docs/deploy-offline.md)
+- Installing on PS Cloud, Kazakhstan (Ubuntu VPS + Caddy HTTPS, real student data): [docs/deploy-ps-cloud.md](docs/deploy-ps-cloud.md)
 - Deploying the demo to Vercel (Turso + Vercel Blob): [docs/deploy-vercel.md](docs/deploy-vercel.md)
 - Security and personal data (Law of the RK No. 94-V), including the deployment checklist: [docs/security.md](docs/security.md)
 - Data model, grading, progression, certificates and the admin cabinet: [docs/data-model.md](docs/data-model.md)

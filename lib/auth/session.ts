@@ -44,7 +44,10 @@ export async function createSession(user: { id: string; role: SessionUser["role"
 
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
+    // Secure whenever the site is served over HTTPS (production, Vercel, PS Cloud). An offline
+    // school-network install runs on plain http://<server-ip>, where browsers would drop a
+    // Secure cookie, so it follows APP_URL (docs/deploy-offline.md).
+    secure: env.NODE_ENV === "production" && env.APP_URL.startsWith("https://"),
     sameSite: "lax",
     path: "/",
     expires: expiresAt,
